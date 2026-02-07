@@ -1,14 +1,14 @@
+// backend/src/app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const {errorHandler, notFound} = require('./middleware/errorMiddleware');
+const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
-const purchaseOrderRoutes = require('./routes/purchaseOrderRoutes');
-const salesInvoiceRoutes = require('./routes/salesInvoiceRoutes');
-const deliveryReceiptRoutes = require('./routes/deliveryReceiptRoutes');
+const documentRoutes = require('./routes/documentRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -17,7 +17,7 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: '*', // Allow all origins
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['*']
@@ -36,18 +36,17 @@ if (process.env.NODE_ENV === 'development') {
 
 // Health Check endpoint
 app.get('/health', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Server is running smoothly',
-        timestamp: new Date().toISOString()
-    });
+  res.json({
+    success: true,
+    message: 'Server is running smoothly',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/purchase-orders', purchaseOrderRoutes);
-app.use('/api/sales-invoices', salesInvoiceRoutes);
-app.use('/api/delivery-receipts', deliveryReceiptRoutes);
+app.use('/api/documents', documentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use(notFound);

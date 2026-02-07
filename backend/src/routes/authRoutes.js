@@ -22,7 +22,8 @@ router.put('/profile', protect, updateProfileValidation, validate, authControlle
 router.put('/change-password', protect, changePasswordValidation, validate, authController.changePassword);
 
 // Admin only routes
-router.post('/register', protect, authorize('admin'), registerValidation, validate, authController.register);
+router.post('/register', registerValidation, validate, authController.register);
+// router.post('/register', protect, authorize('admin'), registerValidation, validate, authController.register);
 router.get('/users', protect, authorize('admin'), authController.getAllUsers);
 router.get('/users/:id', protect, authorize('admin'), authController.getUserById);
 router.put('/users/:id', protect, authorize('admin'), updateUserValidation, validate, authController.updateUser);

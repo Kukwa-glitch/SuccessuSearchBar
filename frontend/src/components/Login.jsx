@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import SSI from '../assets/SSI.png';
 
 const Login = () => {
   const { login } = useAuth();
@@ -24,15 +25,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 mb-4">
-            <svg className="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+          {/* Logo placeholder - you can add your logo image here */}
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-md">
+            <img src={SSI} alt="Logo" className="w-16 h-16" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">DocuFlow</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            SUCCESSU INTERNATIONAL INC.
+          </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">Document Management System</p>
         </div>
 

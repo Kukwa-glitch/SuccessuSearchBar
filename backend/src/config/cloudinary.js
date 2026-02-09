@@ -14,7 +14,7 @@ const uploadToCloudinary = async (buffer, folder = 'documents', resourceType = '
       {
         folder: folder,
         resource_type: resourceType,
-        allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'pdf'],
+        allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'pdf', 'jfif'],
       },
       (error, result) => {
         if (error) {

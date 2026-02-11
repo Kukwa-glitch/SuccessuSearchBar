@@ -9,8 +9,8 @@ const UserDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     type: 'ALL',
-    startDate: '',
-    endDate: '',
+    month: '',
+    year: '',
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -18,18 +18,45 @@ const UserDashboard = () => {
     totalItems: 0,
   });
 
+  // Generate year options (current year and 10 years back)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 11 }, (_, i) => currentYear - i);
+  
+  const months = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
   useEffect(() => {
     fetchDocuments();
-  }, [filters.type, filters.startDate, filters.endDate]);
+  }, [filters.type, filters.month, filters.year]);
 
   const fetchDocuments = async (page = 1, search = searchTerm) => {
     setLoading(true);
     try {
+      // Calculate start and end dates from month/year
+      let startDate, endDate;
+      if (filters.year && filters.month) {
+        startDate = `${filters.year}-${filters.month}-01`;
+        const lastDay = new Date(filters.year, parseInt(filters.month), 0).getDate();
+        endDate = `${filters.year}-${filters.month}-${lastDay}`;
+      }
+
       const params = {
-        search: search,
+        search: search || undefined,
         type: filters.type !== 'ALL' ? filters.type : undefined,
-        startDate: filters.startDate || undefined,
-        endDate: filters.endDate || undefined,
+        startDate: startDate,
+        endDate: endDate,
         page,
         limit: 10,
       };
@@ -123,26 +150,38 @@ const UserDashboard = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Start Date
+              Month
             </label>
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+            <select
+              value={filters.month}
+              onChange={(e) => handleFilterChange('month', e.target.value)}
               className="input-field"
-            />
+            >
+              <option value="">All Months</option>
+              {months.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              End Date
+              Year
             </label>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+            <select
+              value={filters.year}
+              onChange={(e) => handleFilterChange('year', e.target.value)}
               className="input-field"
-            />
+            >
+              <option value="">All Years</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

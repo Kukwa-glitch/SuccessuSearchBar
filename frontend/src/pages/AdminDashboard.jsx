@@ -58,12 +58,20 @@ const AdminDashboard = () => {
   const fetchDocumentsByType = async (type, setter, search = '') => {
     setLoading(true);
     try {
-      const params = {
-        type,
-        search: search || undefined,
-      };
-      const response = await documentAPI.search(params);
-      setter(response.data.data);
+      if (search && search.trim() !== '') {
+        // Use search endpoint when there's a search term
+        const params = {
+          type,
+          search: search.trim(),
+          limit: 1000,
+        };
+        const response = await documentAPI.search(params);
+        setter(response.data.data);
+      } else {
+        // Use getAll endpoint when no search (returns all documents of type)
+        const response = await documentAPI.getAll(type);
+        setter(response.data.data);
+      }
     } catch (error) {
       toast.error('Failed to load documents');
       console.error(error);
@@ -72,10 +80,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSearchChange = debounce((type, value, setter, searchSetter) => {
-    searchSetter(value);
+  // Debounced search handler
+  const debouncedSearch = debounce((type, value, setter) => {
     fetchDocumentsByType(type, setter, value);
   }, 500);
+
+  const handleSearchChange = (e, type, setter, searchSetter) => {
+    const value = e.target.value;
+    searchSetter(value);
+    debouncedSearch(type, value, setter);
+  };
 
   const handleDocumentChange = (e) => {
     const { name, value } = e.target;
@@ -255,7 +269,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const renderDocumentList = (documents, title, type, searchValue, setSearchValue) => (
+  const renderDocumentList = (documents, title, type, searchValue, setSearchValue, setter) => (
     <div className="card p-6 animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 rounded-lg bg-primary-100 dark:bg-primary-900/30">
@@ -274,15 +288,7 @@ const AdminDashboard = () => {
         <input
           type="text"
           value={searchValue}
-          onChange={(e) => {
-            setSearchValue(e.target.value);
-            handleSearchChange(type, e.target.value, 
-              type === 'PURCHASE_ORDER' ? setPurchaseOrders : 
-              type === 'SALES_INVOICE' ? setSalesInvoices : 
-              setDeliveryReceipts,
-              setSearchValue
-            );
-          }}
+          onChange={(e) => handleSearchChange(e, type, setter, setSearchValue)}
           className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           placeholder="Search by company or document number..."
         />
@@ -299,6 +305,19 @@ const AdminDashboard = () => {
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
+        {searchValue && (
+          <button
+            onClick={() => {
+              setSearchValue('');
+              fetchDocumentsByType(type, setter, '');
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -368,7 +387,9 @@ const AdminDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-gray-500 dark:text-gray-400">No documents found</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            {searchValue ? 'No documents found matching your search' : 'No documents found'}
+          </p>
         </div>
       )}
     </div>
@@ -554,13 +575,13 @@ const AdminDashboard = () => {
         )}
 
         {/* Purchase Orders Tab */}
-        {activeTab === 'purchaseOrders' && renderDocumentList(purchaseOrders, 'Purchase Orders', 'PURCHASE_ORDER', searchPO, setSearchPO)}
+        {activeTab === 'purchaseOrders' && renderDocumentList(purchaseOrders, 'Purchase Orders', 'PURCHASE_ORDER', searchPO, setSearchPO, setPurchaseOrders)}
 
         {/* Sales Invoices Tab */}
-        {activeTab === 'salesInvoices' && renderDocumentList(salesInvoices, 'Sales Invoices', 'SALES_INVOICE', searchSI, setSearchSI)}
+        {activeTab === 'salesInvoices' && renderDocumentList(salesInvoices, 'Sales Invoices', 'SALES_INVOICE', searchSI, setSearchSI, setSalesInvoices)}
 
         {/* Delivery Receipts Tab */}
-        {activeTab === 'deliveryReceipts' && renderDocumentList(deliveryReceipts, 'Delivery Receipts', 'DELIVERY_RECEIPT', searchDR, setSearchDR)}
+        {activeTab === 'deliveryReceipts' && renderDocumentList(deliveryReceipts, 'Delivery Receipts', 'DELIVERY_RECEIPT', searchDR, setSearchDR, setDeliveryReceipts)}
 
         {/* Add User Card */}
         {activeTab === 'addUser' && (
